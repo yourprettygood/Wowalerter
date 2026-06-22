@@ -1,0 +1,9 @@
+
+.agents/
+.scratchpad/
+__pycache__/
+build/
+dist/
+*.spec
+
+config.json

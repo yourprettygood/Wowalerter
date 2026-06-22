@@ -1,0 +1,172 @@
+:root {
+    /* DEFAULT THEME (Hub) */
+    --bg-main: #0f1115;
+    --bg-secondary: #1a1d24;
+    --bg-panel: rgba(255, 255, 255, 0.03);
+    --text-main: #f0f0f0;
+    --text-muted: #8892b0;
+    --accent: #00e5ff;
+    --accent-hover: #00b8cc;
+    --border: rgba(255, 255, 255, 0.08);
+    --font-sans: 'Inter', sans-serif;
+    --font-heading: 'Inter', sans-serif;
+}
+
+body.theme-wotlk {
+    /* WOTLK BLIZZLIKE THEME */
+    --bg-main: #06101c; /* Deep Ice Blue */
+    --bg-secondary: #0a192f;
+    --bg-panel: rgba(13, 31, 56, 0.6);
+    --text-main: #e2f1ff; /* Frosty white */
+    --text-muted: #7fa9c8;
+    --accent: #00d2ff; /* Frost glow */
+    --accent-hover: #4ae1ff;
+    --border: rgba(0, 162, 255, 0.2);
+    --font-heading: 'Marcellus', serif; /* Classic Fantasy feel */
+}
+
+body.theme-wotlk .app-container {
+    background: radial-gradient(circle at top right, rgba(0, 162, 255, 0.1), transparent 50%),
+                radial-gradient(circle at bottom left, rgba(0, 255, 170, 0.05), transparent 40%);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    overflow: hidden;
+    user-select: none;
+    transition: background-color 0.5s ease;
+}
+
+h1, h2, h3 { font-family: var(--font-heading); font-weight: 600; }
+
+/* Titlebar */
+.titlebar {
+    height: 32px;
+    background: var(--bg-secondary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--border);
+    -webkit-app-region: drag; /* Important for pywebview frameless drag */
+}
+.titlebar-logo { font-size: 12px; font-weight: 600; color: var(--text-muted); letter-spacing: 1px; }
+.titlebar-controls { display: flex; -webkit-app-region: no-drag; }
+.control-btn {
+    background: none; border: none; color: var(--text-muted);
+    width: 32px; height: 32px; cursor: pointer; font-size: 14px;
+    transition: all 0.2s;
+}
+.control-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.close-btn:hover { background: #ff3333; }
+
+/* Screens */
+.app-container { height: calc(100vh - 32px); position: relative; background: var(--bg-main); overflow: hidden; }
+.screen { display: none !important; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: var(--bg-main); z-index: 10; }
+.screen.active { display: flex !important; z-index: 20; animation: fadeIn 0.4s ease forwards; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Common UI */
+.btn {
+    padding: 10px 20px; border-radius: 6px; border: none; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; font-family: var(--font-sans);
+}
+.btn-primary { background: var(--accent); color: #000; }
+.btn-primary:hover { background: var(--accent-hover); box-shadow: 0 0 15px rgba(0, 210, 255, 0.4); }
+.btn-secondary { background: var(--bg-panel); color: var(--text-main); border: 1px solid var(--border); }
+.btn-secondary:hover { background: rgba(255,255,255,0.1); }
+.btn-small { padding: 6px 12px; font-size: 12px; }
+
+/* Screen 1: Login */
+#screen-login { justify-content: center; align-items: center; }
+.login-box { text-align: center; max-width: 400px; }
+.logo-large { font-size: 3rem; margin-bottom: 10px; color: var(--accent); letter-spacing: 2px; }
+.subtitle { color: var(--text-muted); margin-bottom: 40px; font-size: 1.1rem; }
+.login-buttons { display: flex; flex-direction: column; gap: 15px; }
+
+/* Screen 2: Games */
+#screen-games { flex-direction: column; padding: 40px; }
+.section-title { font-size: 2rem; margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+.games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+.game-card {
+    height: 150px; background: var(--bg-panel); border: 1px solid var(--border);
+    border-radius: 12px; cursor: pointer; transition: all 0.3s;
+    position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 20px;
+}
+.game-card:hover:not(.disabled) { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+.game-card.disabled { opacity: 0.5; cursor: not-allowed; }
+.game-card-content h3 { font-size: 1.2rem; margin-bottom: 5px; z-index: 2; position: relative; }
+.game-card-content p { color: var(--text-muted); font-size: 0.9rem; z-index: 2; position: relative; }
+.wow-card::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(to top, var(--bg-secondary), transparent); z-index: 1;
+}
+
+/* Screen 3: Dashboard Layout */
+.dashboard-layout { display: flex; flex-direction: row; }
+.sidebar {
+    width: 250px; background: var(--bg-secondary); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; padding: 20px 0;
+}
+.sidebar-header { padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+.sidebar-header h2 { color: var(--accent); }
+.nav-menu { list-style: none; flex-grow: 1; }
+.nav-item {
+    padding: 12px 20px; color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+    border-left: 3px solid transparent; font-weight: 600;
+}
+.nav-item:hover { color: var(--text-main); background: rgba(255,255,255,0.02); }
+.nav-item.active { color: var(--text-main); border-left-color: var(--accent); background: linear-gradient(90deg, rgba(0, 229, 255, 0.1), transparent); }
+.sidebar-footer { padding: 20px; }
+
+.content-area { flex-grow: 1; padding: 40px; overflow-y: auto; }
+.tab-content { display: none; animation: fadeIn 0.3s; }
+.tab-content.active { display: block; }
+.tab-content h1 { margin-bottom: 30px; font-size: 2rem; }
+
+/* Dashboard UI Elements */
+.status-panel {
+    background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;
+}
+.status-indicator { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+.dot { width: 12px; height: 12px; border-radius: 50%; }
+.dot.red { background: #ff4757; box-shadow: 0 0 10px #ff4757; }
+.dot.green { background: #2ed573; box-shadow: 0 0 10px #2ed573; }
+
+.toggles-list { display: flex; flex-direction: column; gap: 15px; }
+.toggle-row {
+    background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px; display: flex; justify-content: space-between; align-items: center;
+}
+.toggle-info h3 { margin-bottom: 5px; font-size: 1.1rem; }
+.toggle-info p { color: var(--text-muted); font-size: 0.9rem; }
+
+/* Switch Toggle */
+.switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.1); transition: .4s; border-radius: 34px; }
+.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: var(--text-muted); transition: .4s; border-radius: 50%; }
+input:checked + .slider { background-color: var(--accent); }
+input:checked + .slider:before { transform: translateX(24px); background-color: #000; }
+
+/* Telegram Tab */
+.telegram-setup-box {
+    display: flex; gap: 30px; background: var(--bg-panel); border: 1px solid var(--border);
+    border-radius: 12px; padding: 30px; margin-top: 20px;
+}
+.qr-placeholder {
+    width: 150px; height: 150px; background: rgba(0,0,0,0.3); border: 2px dashed var(--border);
+    border-radius: 12px; display: flex; justify-content: center; align-items: center;
+}
+.qr-icon { font-size: 4rem; opacity: 0.5; }
+.code-info { display: flex; flex-direction: column; gap: 15px; justify-content: center; }
+.auth-code { font-family: monospace; font-size: 2rem; font-weight: bold; color: var(--accent); letter-spacing: 3px; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; text-align: center; border: 1px solid var(--border); }

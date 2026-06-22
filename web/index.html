@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameAlerter</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Marcellus&display=swap" rel="stylesheet">
+</head>
+<body class="theme-default">
+    <!-- Кастомный заголовок окна (Titlebar) для перетаскивания -->
+    <div class="titlebar pywebview-drag-region">
+        <div class="titlebar-logo">GameAlerter</div>
+        <div class="titlebar-controls">
+            <button onclick="window.pywebview.api.minimize()" class="control-btn minimize-btn">_</button>
+            <button onclick="window.pywebview.api.close()" class="control-btn close-btn">X</button>
+        </div>
+    </div>
+
+    <div class="app-container">
+        
+        <!-- ЭКРАН 1: ВХОД -->
+        <div id="screen-login" class="screen active">
+            <div class="login-box">
+                <h1 class="logo-large">GameAlerter</h1>
+                <p class="subtitle">Никаких ложных тревог. Только важные события.</p>
+                <div class="login-buttons">
+                    <button class="btn btn-primary" onclick="app.loginGuest()">Продолжить без аккаунта</button>
+                    <button class="btn btn-secondary tooltip" data-tooltip="Облачная синхронизация скоро появится">Зарегистрироваться</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ЭКРАН 2: ВЫБОР ИГРЫ -->
+        <div id="screen-games" class="screen">
+            <h2 class="section-title">Выберите игру</h2>
+            <div class="games-grid">
+                <div class="game-card wow-card" onclick="app.selectGame('wow_wotlk')">
+                    <div class="game-card-bg"></div>
+                    <div class="game-card-content">
+                        <h3>World of Warcraft</h3>
+                        <p>WotLK / 3.3.5</p>
+                    </div>
+                </div>
+                <div class="game-card disabled tooltip" data-tooltip="Модуль в разработке">
+                    <div class="game-card-content">
+                        <h3>Dota 2</h3>
+                        <p>Ожидается</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ЭКРАН 3: ДАШБОРД (Пример WoW) -->
+        <div id="screen-dashboard" class="screen dashboard-layout">
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h2 id="active-game-title">WotLK</h2>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item active" onclick="app.switchTab(event, 'tab-main')">Панель управления</li>
+                    <li class="nav-item" onclick="app.switchTab(event, 'tab-telegram')">Telegram</li>
+                    <li class="nav-item" onclick="app.switchTab(event, 'tab-settings')">Настройки</li>
+                </ul>
+                <div class="sidebar-footer">
+                    <button class="btn btn-outline" onclick="app.logout()">Сменить игру</button>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <!-- Вкладка: Панель управления -->
+                <div id="tab-main" class="tab-content active">
+                    <h1>Статус системы</h1>
+                    
+                    <div class="status-panel">
+                        <div class="status-indicator">
+                            <div id="logs-status-dot" class="dot red"></div>
+                            <span id="logs-status-text">Логи не подключены</span>
+                        </div>
+                        <button class="btn btn-small" onclick="app.setupLogs()">Настроить путь к WoW</button>
+                    </div>
+
+                    <div class="toggles-list">
+                        <div class="toggle-row">
+                            <div class="toggle-info">
+                                <h3>Поиск подземелий / РЧ</h3>
+                                <p>Мгновенное оповещение о всплывающих окнах.</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" checked id="toggle-rc" onchange="app.updateSetting('rc_enabled', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row">
+                            <div class="toggle-info">
+                                <h3>Личные сообщения</h3>
+                                <p>Пересылка шепота в Telegram (задержка до 30с).</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" checked id="toggle-whisper" onchange="app.updateSetting('whisper_enabled', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Вкладка: Telegram -->
+                <div id="tab-telegram" class="tab-content">
+                    <h1>Подключение Telegram</h1>
+                    <p class="desc">Привяжите Telegram для получения бесшумных пуш-уведомлений.</p>
+                    
+                    <div class="telegram-setup-box">
+                        <div class="qr-placeholder">
+                            <!-- Тут будет сгенерированный QR или иконка -->
+                            <div class="qr-icon">📱</div>
+                        </div>
+                        <div class="code-info">
+                            <p>1. Откройте бота <b>@GameAlerter_Bot</b></p>
+                            <p>2. Отправьте ему этот код привязки:</p>
+                            <div class="auth-code" id="tg-auth-code">ОЖИДАНИЕ...</div>
+                            <button class="btn btn-primary" onclick="app.generateTgCode()">Сгенерировать код</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Вкладка: Настройки -->
+                <div id="tab-settings" class="tab-content">
+                    <h1>Настройки</h1>
+                    <div class="toggles-list">
+                        <div class="toggle-row">
+                            <div class="toggle-info">
+                                <h3>Режим AFK (Бета)</h3>
+                                <p>Слать уведомления, только если за ПК нет активности 3+ минут.</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="toggle-afk" onchange="app.updateSetting('afk_enabled', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row">
+                            <div class="toggle-info">
+                                <h3>Автозапуск</h3>
+                                <p>Запускать GameAlerter вместе с Windows (в трее).</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="toggle-autostart" onchange="app.updateSetting('autostart_enabled', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

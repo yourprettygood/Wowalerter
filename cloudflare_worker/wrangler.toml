@@ -1,0 +1,7 @@
+name = "gamealerter-api-auto"
+main = "index.js"
+compatibility_date = "2024-06-22"
+
+[[kv_namespaces]]
+binding = "DB"
+id = "e96068d367864637abb9232e6c8fa0a2"
