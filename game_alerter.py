@@ -58,17 +58,21 @@ def should_send_alert(alert_type):
     return True
 
 def send_telegram_message(text):
-    auth_code = global_config.get("telegram_auth_code", "")
+    device_id = global_config.get("device_id", "")
     
-    if not auth_code:
+    if not device_id:
+        logging.warning("Нет device_id, алерт не отправлен")
         return
         
-    try:
-        url = "https://gamealerter-api-auto.didur-danil.workers.dev/notify"
-        payload = {"code": auth_code, "message": text}
-        requests.post(url, json=payload)
-    except Exception as e:
-        logging.error(f"Ошибка отправки в облако: {e}")
+    def _send():
+        try:
+            url = "https://gamealerter-api-auto.didur-danil.workers.dev/notify"
+            payload = {"device_id": device_id, "message": text}
+            requests.post(url, json=payload, timeout=5)
+        except Exception as e:
+            logging.error(f"Ошибка отправки в облако: {e}")
+            
+    threading.Thread(target=_send, daemon=True).start()
 
 def chatlog_monitor():
     global recent_whisper_text, recent_whisper_time

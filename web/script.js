@@ -68,6 +68,22 @@ const app = {
         if(window.pywebview) {
             await window.pywebview.api.update_setting(key, value);
         }
+    },
+    async checkLinkStatus() {
+        if(window.pywebview) {
+            let status = await window.pywebview.api.check_link_status();
+            const box = document.getElementById('telegram-setup-box');
+            if (status.linked) {
+                box.innerHTML = `
+                    <div class="linked-success" style="text-align: center; color: #40c840;">
+                        <h2>✅ Успешно привязано</h2>
+                        <p>Аккаунт: <b>${status.username}</b></p>
+                        <p style="margin-top:10px; font-size:12px; color:#888;">Если вы хотите привязать другой ПК, отправьте боту команду /unlink</p>
+                    </div>
+                `;
+                if (window.linkInterval) clearInterval(window.linkInterval);
+            }
+        }
     }
 };
 
@@ -81,9 +97,6 @@ window.addEventListener('pywebviewready', async function() {
         if (config.afk_enabled !== undefined) document.getElementById('toggle-afk').checked = config.afk_enabled;
         if (config.autostart_enabled !== undefined) document.getElementById('toggle-autostart').checked = config.autostart_enabled;
         
-        if (config.telegram_auth_code) {
-            document.getElementById('tg-auth-code').innerText = config.telegram_auth_code;
-        }
         if (config.wow_log_path) {
             const dot = document.getElementById('logs-status-dot');
             const txt = document.getElementById('logs-status-text');
@@ -91,4 +104,12 @@ window.addEventListener('pywebviewready', async function() {
             txt.innerText = "Логи подключены: " + config.wow_log_path;
         }
     }
+    
+    // Сразу проверяем статус привязки
+    await app.checkLinkStatus();
+    
+    // Периодически проверяем (раз в 5 секунд)
+    window.linkInterval = setInterval(() => {
+        app.checkLinkStatus();
+    }, 5000);
 });

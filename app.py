@@ -7,6 +7,8 @@ import string
 import winreg as reg
 import sys
 import logging
+import uuid
+import requests
 from tkinter import filedialog
 import tkinter as tk
 
@@ -20,6 +22,12 @@ class Api:
         if not self.config:
             self.config = game_alerter.load_config()
             game_alerter.global_config = self.config
+            
+        if "device_id" not in self.config:
+            self.config["device_id"] = str(uuid.uuid4())
+            with open("config.json", "w", encoding="utf-8") as f:
+                json.dump(self.config, f, indent=4)
+            game_alerter.global_config["device_id"] = self.config["device_id"]
 
     def minimize(self):
         self.window.minimize()
@@ -49,16 +57,32 @@ class Api:
         return {"success": False}
 
     def generate_tg_code(self):
-        # Если код уже есть, используем его, иначе генерируем новый
-        code = self.config.get("telegram_auth_code", "")
-        if not code:
-            code = '-'.join(''.join(random.choices(string.ascii_uppercase + string.digits, k=4)) for _ in range(2))
-            self.config["telegram_auth_code"] = code
-            with open("config.json", "w", encoding="utf-8") as f:
-                json.dump(self.config, f, indent=4)
-            game_alerter.global_config["telegram_auth_code"] = code
+        # Всегда генерируем свежий код, так как он живет 10 минут на сервере
+        code = '-'.join(''.join(random.choices(string.ascii_uppercase + string.digits, k=4)) for _ in range(2))
+        
+        device_id = self.config.get("device_id")
+        try:
+            url = "https://gamealerter-api-auto.didur-danil.workers.dev/api/pair"
+            requests.post(url, json={"device_id": device_id, "code": code}, timeout=5)
+        except Exception as e:
+            self.log_action(f"Ошибка привязки кода на сервере: {e}")
             
         return code
+
+    def check_link_status(self):
+        device_id = self.config.get("device_id")
+        if not device_id:
+            return {"linked": False}
+            
+        try:
+            url = "https://gamealerter-api-auto.didur-danil.workers.dev/api/status"
+            resp = requests.post(url, json={"device_id": device_id}, timeout=5)
+            if resp.status_code == 200:
+                return resp.json()
+        except Exception as e:
+            self.log_action(f"Ошибка проверки статуса: {e}")
+            
+        return {"linked": False}
 
     def update_setting(self, key, value):
         self.config[key] = value
